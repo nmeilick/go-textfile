@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -143,6 +144,18 @@ func Grep(re *regexp.Regexp, invert bool) FilterFunc {
 			return l, nil
 		}
 		return nil, nil
+	})
+}
+
+// PrependSource returns a filter function that prepends the given
+// source (with {n} replaced by the current line number), followed
+// by a zero byte to the line.
+// This function must not be reused with other streams to ensure
+// the line count is correct.
+func PrependSource(source string) FilterFunc {
+	return Map(func(l []byte) ([]byte, error) {
+		src := strings.ReplaceAll(s, "{n}", strconv.Itoa(n))
+		return append([]byte(src+"\000"), l...)
 	})
 }
 
